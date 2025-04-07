@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>🎯 APK Card Generator - GxMods</title>
+  <style>
+    body {
+      background: #121212;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #4fc3f7;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: none;
+      border-radius: 8px;
+      background: #1e1e1e;
+      color: #fff;
+    }
+
+    .btn {
+      margin-top: 16px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: #0072ff;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #2196f3;
+    }
+
+    #result {
+      margin-top: 30px;
+    }
+
+    textarea#output {
+      width: 100%;
+      height: 300px;
+      background: #1e1e1e;
+      color: #0f0;
+      font-family: monospace;
+      padding: 12px;
+      border-radius: 8px;
+      resize: vertical;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 APK Card Generator - GxMods</h1>
+
+  <label>Judul Aplikasi:</label>
+  <input type="text" id="title">
+
+  <label>Versi:</label>
+  <input type="text" id="version">
+
+  <label>Nama Developer:</label>
+  <input type="text" id="developer">
+
+  <label>Link Icon APK:</label>
+  <input type="text" id="icon">
+
+  <label>Link Download MOD:</label>
+  <input type="text" id="download">
+
+  <label>Deskripsi Aplikasi:</label>
+  <textarea id="description"></textarea>
+
+  <label>Informasi MOD:</label>
+  <textarea id="modinfo"></textarea>
+
+  <label>Screenshots (maks. 5, pisahkan dengan koma):</label>
+  <textarea id="screenshots" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
+
+  <label>Tags (genre, kategori - pisahkan dengan koma):</label>
+  <input type="text" id="tags">
+
+  <label>Ukuran:</label>
+  <input type="text" id="size">
+
+  <label>Tanggal Update:</label>
+  <input type="text" id="update">
+
+  <label>Minimal Android:</label>
+  <input type="text" id="android">
+
+  <div class="btn-group">
+    <button class="btn" onclick="generate()">Generate HTML</button>
+    <button class="btn" onclick="copyCode()">Copy HTML</button>
+    <button class="btn" onclick="resetForm()">Reset Form</button>
+  </div>
+
+  <div id="result">
+    <label>Hasil Kode HTML:</label>
+    <textarea id="output" readonly></textarea>
+  </div>
+
+  <script>
+    function generate() {
+      const title = document.getElementById("title").value;
+      const version = document.getElementById("version").value;
+      const developer = document.getElementById("developer").value;
+      const icon = document.getElementById("icon").value;
+      const download = document.getElementById("download").value;
+      const description = document.getElementById("description").value;
+      const modinfo = document.getElementById("modinfo").value;
+      const tags = document.getElementById("tags").value.split(',').map(tag => tag.trim()).filter(Boolean);
+      const screenshots = document.getElementById("screenshots").value.split(',').map(src => src.trim()).filter(Boolean);
+      const size = document.getElementById("size").value;
+      const update = document.getElementById("update").value;
+      const android = document.getElementById("android").value;
+
+      let tagHTML = tags.map(tag => `<span class="apk-tag">${tag}</span>`).join(' ');
+      let ssHTML = screenshots.map(src => `<img src="${src}" alt="Screenshot">`).join('\n');
+
+      const html = `
+<div class="apk-post-card">
+  <div class="apk-header">
+    <img class="apk-icon" src="${icon}" alt="App Icon">
+    <div class="apk-title-area">
+      <div class="apk-title">${title} <img class="verified-icon" src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified"></div>
+      <div class="apk-developer">by <a href="#" style="color:#4fc3f7;text-decoration:none;">${developer}</a></div>
+    </div>
+  </div>
+  <div class="apk-tags">${tagHTML}</div>
+  <div class="apk-rating">★★★★★ 4,9</div>
+  <div class="apk-section-title">Deskripsi</div>
+  <div class="apk-description">${description}</div>
+  <div class="apk-section-title">Screenshots</div>
+  <div class="apk-screenshots">${ssHTML}</div>
+  <div class="apk-section-title">Informasi APK</div>
+  <div class="apk-info">
+    <span>Versi: ${version}</span>
+    <span>Ukuran: ${size}</span>
+    <span>Update: ${update}</span>
+    <span>${android}</span>
+  </div>
+  <div class="apk-section-title">MOD Info</div>
+  <div class="apk-description">${modinfo}</div>
+  <div class="apk-buttons">
+    <a href="${download}" class="download-button" onclick="startDownload(event, '${download}')">
+      <span>Download MOD</span>
+    </a>
+    <div class="spinner-area" style="display:none;">
+      <div class="spinner"></div>
+      <div class="downloading-text">Downloading...</div>
+    </div>
+  </div>
+</div>`;
+
+      document.getElementById("output").value = html.trim();
+    }
+
+    function copyCode() {
+      const output = document.getElementById("output");
+      output.select();
+      output.setSelectionRange(0, 99999); // mobile
+      document.execCommand("copy");
+      alert("✅ Kode HTML berhasil disalin!");
+    }
+
+    function resetForm() {
+      document.querySelectorAll("input, textarea").forEach(el => el.value = '');
+      document.getElementById("output").value = '';
+    }
+  </script>
+
+</body>
+</html>
