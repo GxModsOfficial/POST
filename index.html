@@ -138,6 +138,10 @@
       let tagHTML = tags.map(tag => `<span class="apk-tag">${tag}</span>`).join(' ');
       let ssHTML = screenshots.map(src => `<img src="${src}" alt="Screenshot">`).join('\n');
 
+      // Memproses deskripsi dan informasi MOD dengan mendeteksi apakah itu list atau bukan
+      const descriptionHTML = processText(description);
+      const modinfoHTML = processText(modinfo);
+
       const html = `
 <div class="apk-post-card">
   <div class="apk-header">
@@ -150,7 +154,7 @@
   <div class="apk-tags">${tagHTML}</div>
   <div class="apk-rating">★★★★★ 4,9</div>
   <div class="apk-section-title">Deskripsi</div>
-  <div class="apk-description">${description}</div>
+  <div class="apk-description">${descriptionHTML}</div>
   <div class="apk-section-title">Screenshots</div>
   <div class="apk-screenshots">${ssHTML}</div>
   <div class="apk-section-title">Informasi APK</div>
@@ -161,7 +165,7 @@
     <span>${android}</span>
   </div>
   <div class="apk-section-title">MOD Info</div>
-  <div class="apk-description">${modinfo}</div>
+  <div class="apk-description">${modinfoHTML}</div>
   <div class="apk-buttons">
     <a href="${download}" class="download-button" onclick="startDownload(event, '${download}')">
       <span>Download MOD</span>
@@ -174,6 +178,35 @@
 </div>`;
 
       document.getElementById("output").value = html.trim();
+    }
+
+    // Fungsi untuk memproses teks dan mengubahnya menjadi list atau teks biasa
+    function processText(inputText) {
+      if (!inputText.trim()) {
+        return '';  // Jika teks kosong, kembalikan string kosong
+      }
+
+      const lines = inputText.split('\n');
+      let result = '';
+
+      // Deteksi jika ada list berdasarkan tanda bullet atau angka
+      let isList = false;
+      for (let line of lines) {
+        if (line.trim().startsWith('-') || line.trim().startsWith('*') || line.trim().match(/^\d+\./)) {
+          isList = true;
+          break;
+        }
+      }
+
+      if (isList) {
+        // Hanya menambahkan <ul> dan <li> jika ada teks di dalamnya
+        result = `<ul>${lines.filter(line => line.trim()).map(line => `<li>${line.replace(/^\*|\-|\d+\./, '').trim()}</li>`).join('')}</ul>`;
+      } else {
+        // Teks biasa, tidak dalam bentuk list
+        result = lines.filter(line => line.trim()).map(line => `<p>${line}</p>`).join('');
+      }
+
+      return result;
     }
 
     function copyCode() {
