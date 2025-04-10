@@ -53,7 +53,7 @@
 
     textarea#output {
       width: 100%;
-      height: 300px;
+      height: 400px;
       background: #1e1e1e;
       color: #0f0;
       font-family: monospace;
@@ -66,6 +66,35 @@
       display: flex;
       gap: 10px;
       margin-top: 10px;
+    }
+
+    .stat-box {
+      display: flex;
+      justify-content: space-between;
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .stat-item {
+      flex: 1;
+      border-right: 1px solid #333;
+    }
+
+    .stat-item:last-child {
+      border-right: none;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #bbb;
     }
   </style>
 </head>
@@ -87,6 +116,15 @@
 
   <label>Link Download MOD:</label>
   <input type="text" id="download">
+
+  <label>Rating:</label>
+  <input type="text" id="rating" placeholder="contoh: 4,9">
+
+  <label>Jumlah Ulasan:</label>
+  <input type="text" id="reviews" placeholder="contoh: 120 rb+">
+
+  <label>Jumlah Download:</label>
+  <input type="text" id="downloads" placeholder="contoh: 1 jt+">
 
   <label>Deskripsi Aplikasi:</label>
   <textarea id="description"></textarea>
@@ -134,11 +172,12 @@
       const size = document.getElementById("size").value;
       const update = document.getElementById("update").value;
       const android = document.getElementById("android").value;
+      const rating = document.getElementById("rating").value;
+      const reviews = document.getElementById("reviews").value;
+      const downloads = document.getElementById("downloads").value;
 
       let tagHTML = tags.map(tag => `<span class="apk-tag">${tag}</span>`).join(' ');
       let ssHTML = screenshots.map(src => `<img src="${src}" alt="Screenshot">`).join('\n');
-
-      // Memproses deskripsi dan informasi MOD dengan mendeteksi apakah itu list atau bukan
       const descriptionHTML = processText(description);
       const modinfoHTML = processText(modinfo);
 
@@ -151,8 +190,23 @@
       <div class="apk-developer">by <a href="#" style="color:#4fc3f7;text-decoration:none;">${developer}</a></div>
     </div>
   </div>
+
+  <div class="stat-box">
+    <div class="stat-item">
+      <div class="stat-value">${rating}</div>
+      <div class="stat-label">Rating</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">${reviews}</div>
+      <div class="stat-label">Ulasan</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">${downloads}</div>
+      <div class="stat-label">Download</div>
+    </div>
+  </div>
+
   <div class="apk-tags">${tagHTML}</div>
-  <div class="apk-rating">★★★★★ 4,9</div>
   <div class="apk-section-title">Deskripsi</div>
   <div class="apk-description">${descriptionHTML}</div>
   <div class="apk-section-title">Screenshots</div>
@@ -180,39 +234,18 @@
       document.getElementById("output").value = html.trim();
     }
 
-    // Fungsi untuk memproses teks dan mengubahnya menjadi list atau teks biasa
     function processText(inputText) {
-      if (!inputText.trim()) {
-        return '';  // Jika teks kosong, kembalikan string kosong
-      }
-
+      if (!inputText.trim()) return '';
       const lines = inputText.split('\n');
-      let result = '';
-
-      // Deteksi jika ada list berdasarkan tanda bullet atau angka
-      let isList = false;
-      for (let line of lines) {
-        if (line.trim().startsWith('-') || line.trim().startsWith('*') || line.trim().match(/^\d+\./)) {
-          isList = true;
-          break;
-        }
-      }
-
-      if (isList) {
-        // Hanya menambahkan <ul> dan <li> jika ada teks di dalamnya
-        result = `<ul>${lines.filter(line => line.trim()).map(line => `<li>${line.replace(/^\*|\-|\d+\./, '').trim()}</li>`).join('')}</ul>`;
-      } else {
-        // Teks biasa, tidak dalam bentuk list
-        result = lines.filter(line => line.trim()).map(line => `<p>${line}</p>`).join('');
-      }
-
-      return result;
+      let isList = lines.some(line => line.trim().startsWith('-') || line.trim().startsWith('*') || /^\d+\./.test(line.trim()));
+      return isList
+        ? `<ul>${lines.filter(line => line.trim()).map(line => `<li>${line.replace(/^\*|\-|\d+\./, '').trim()}</li>`).join('')}</ul>`
+        : lines.filter(line => line.trim()).map(line => `<p>${line}</p>`).join('');
     }
 
     function copyCode() {
       const output = document.getElementById("output");
       output.select();
-      output.setSelectionRange(0, 99999); // mobile
       document.execCommand("copy");
       alert("✅ Kode HTML berhasil disalin!");
     }
